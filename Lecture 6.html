@@ -3,11 +3,11 @@
 				<html>
 					<head>
 						<meta charset="UTF-8">
-						<link rel="stylesheet" href="pluginAssets/highlight.js/atom-one-light.css">
-						<title>Lecture 5</title>
+						<link rel="stylesheet" href="pluginAssets/katex/katex.css">
+						<title>Lecture 6</title>
 					</head>
 					<body>
-						<div class="exported-note"><div class="exported-note-title">Lecture 5</div>
+						<div class="exported-note"><div class="exported-note-title">Lecture 6</div>
 
 <style>
 		html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}
@@ -290,65 +290,188 @@
 				height: auto !important;
 			}
 		}
-	</style><div id="rendered-md"><h1 id="context-free-languages">Context-free languages</h1>
-<h2 id="context-free-grammars-cfg">Context-free grammars (CFG)</h2>
-<p>Grammar G = (V,T,S,P) is &quot;context-free&quot; if all production rules are of<br>
-the form A → u, where A is a variable and u is variable or terminal.<br>
-i.e., LHS of all rules is a single variable.</p>
-<p>A language L is context-free if it has a context-free grammar.</p>
-<p>Let G be grammar, consider derivation S ⇒<sup>*</sup> w.</p>
-<ul>
-<li>G right linear: w contains at most one variable</li>
-<li>G context-free: w can contain multiple variables</li>
-</ul>
-<p>Which variable do you expand? Leftmost, or rightmost. The result<br>
-doesn't depend on the strategy, but on the choice of rules.</p>
-<h2 id="derivation-trees">Derivation trees</h2>
-<p>Derivation tree for a CFG has nodes with labels that can be variables,<br>
-terminals, or λ.</p>
-<ul>
-<li>root is labeled by start symbol</li>
-<li>if there is production rule:
-<ul>
-<li>A → x<sub>1</sub> ... x<sub>n</sub> with n  ≥ 1: node labelled A can have children<br>
-labelled x<sub>1</sub>...x<sub>n</sub>.</li>
-<li>A → λ: node labelled A can have one child with label λ</li>
-</ul>
-</li>
-<li>every node with label that's a terminal is a leaf (has no children)</li>
-</ul>
-<p>Labels of leaves of derivation tree, from left to right, skipping λ,<br>
-form a word in L(G).</p>
-<h2 id="ambiguous-grammars">Ambiguous grammars</h2>
-<p>A CFG is ambiguous if there is a word in the language that can have<br>
-multiple derivation trees.</p>
-<p>An example of ambiguity is the dangling else problem. Joerg gave an<br>
-example in ALGOL, but it's the same in C (and is solved by always<br>
-making else bind tightly, i.e. to the nearest if):</p>
-<pre class="hljs"><code><span class="hljs-selector-tag">if</span> (condition)
-<span class="hljs-selector-tag">if</span> (condition2) <span class="hljs-selector-tag">printf</span>(<span class="hljs-string">"Whatever"</span>);
-<span class="hljs-selector-tag">else</span> <span class="hljs-selector-tag">printf</span>(<span class="hljs-string">"Something else"</span>);
-<span class="hljs-comment">// without braces or indentation, you don't know whether the else corresponds to the</span>
-<span class="hljs-comment">//  inner or outer if.</span>
-</code></pre>
-<p>Ambiguity is undecidable -- you can't algorithmically determine whether<br>
-a CFG is ambiguous.</p>
-<p>Inherently ambiguous language: if the language is context free, and<br>
-every grammar for that language is ambiguous.</p>
-<h2 id="normalising">Normalising</h2>
-<h3 id="removal-of-λ-rules">Removal of λ rules</h3>
-<p>λ-production rule: a rule where a variable can rewrite to λ</p>
+	</style><div id="rendered-md"><h1 id="normalising-contd">Normalising (contd)</h1>
+<h2 id="removal-of-unit-production-rules">Removal of unit production rules</h2>
+<p>Unit production rule: A → B, where B is a variable Steps:</p>
+<ol>
+<li>Remove all λ-productions</li>
+<li>Determine all pairs of different <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><msup><mo>→</mo><mo>+</mo></msup><mi>B</mi></mrow><annotation encoding="application/x-tex">A \rightarrow^+ B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.771331em;vertical-align:0em;"></span><span class="mord mathdefault">A</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel">→</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.771331em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">+</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span></span></span></span></li>
+<li>Whenever there's a derivation A → B → y, add new rule A → y.</li>
+<li>Remove all unit production rules</li>
+</ol>
+<h2 id="chomsky-normal-form">Chomsky normal form</h2>
+<p>When all rules have form A → BC or A → a. i.e.: the RHS is either two<br>
+variables, or a terminal.</p>
 <p>Steps:</p>
 <ol>
-<li>Note which variables rewrite to λ (any number of steps).</li>
-<li>For all variables B from step 1: for every rule A → xBy, add a new<br>
-rule A → xy.
+<li>Remove all λ-productions</li>
+<li>Remove all unit production rules</li>
+<li>For every terminal a:
+<ol>
+<li>add: variable C<sub>a</sub>, rule C<sub>a</sub> → a.</li>
+<li>in any rule with length RHS  ≥ 2, replace the terminal a with<br>
+C<sub>a</sub></li>
+</ol>
+</li>
+<li>Split all rules so that they have a maximum of 2 variables on the<br>
+RHS, by adding new rules and variables. Example:
 <ul>
-<li>watch out for transitivity: i.e. if A → B and B → λ, then A → λ.</li>
+<li>start with one rule, {A → BCDE}.</li>
+<li>split, introduce variable X<sub>1</sub>: {A → BX<sub>1</sub>, X<sub>1</sub> → CDE}</li>
+<li>split, introduce variable X<sub>2</sub>: {A → BX<sub>1</sub>, X<sub>1</sub> → CX<sub>2</sub>, X<sub>2</sub> → DE}</li>
+<li>no more splits needed, as every rule has max 2 variables on the<br>
+RHS.</li>
 </ul>
 </li>
-<li>Remove all rules with λ on the right hand side.</li>
 </ol>
+<h2 id="removing-useless-variables">Removing useless variables</h2>
+<p>Why? It simplifies the grammar, sometimes by a ton.</p>
+<p>A variable is:</p>
+<ul>
+<li>useless if there's no way to reach it when deriving a<br>
+word/terminal. If you remove production rules with useless<br>
+variables, the language doesn't change.</li>
+<li>productive if it derives to a terminal. If it's not productive,<br>
+it's useless (just like your average student)</li>
+</ul>
+<p>Steps:</p>
+<ol>
+<li>Determine the productive variables: if A → y is a rule, and all<br>
+variables in y are productive, then A is productive.</li>
+<li>Remove rules containing a non-productive variable.</li>
+<li>Determine reachable variables:
+<ul>
+<li>start symbol is always reachable</li>
+<li>if A → y, and A is reachable, then so are all variables in y.</li>
+</ul>
+</li>
+<li>Remove rules containing an ureachable variable.</li>
+<li>Any variable from the original grammar that doesn't show up in the<br>
+remaining rules is useless.</li>
+</ol>
+<p>So basically, evict the unproductive and useless. Don't quote me on<br>
+that.</p>
+<h2 id="erasable-variables">Erasable variables</h2>
+<p>A is erasable if you can somehow derive λ from it.</p>
+<ul>
+<li>if A → λ, A is erasable</li>
+<li>if A → B<sub>1</sub>...B<sub>n</sub>, and B<sub>1</sub>...B<sub>n</sub> are erasable, then so is A.</li>
+</ul>
+<h1 id="parsing">Parsing</h1>
+<p>Parsing: the search for a derivation tree for a given word.</p>
+<p>For CFGs, parsing is possible in O(|w|<sup>3</sup>) time, where |w| is length<br>
+of input word.</p>
+<h2 id="bottom-up-parsing-right-to-left">Bottom-up parsing (right-to-left)</h2>
+<p>Start from input word, try to construct starting variable S. Applies<br>
+rules backwards.</p>
+<p>The CYK (Cocke-Younger-Kasami) algorithm does bottom-up parsing for<br>
+grammars in Chomsky normal form. It determines whether a non-empty word<br>
+w is in L(G) (i.e., is accepted by the grammar).</p>
+<p>Steps:</p>
+<ol>
+<li>Take grammar G in Chomsky normal form. Hopefully someone will be<br>
+nice enough to give you that; if not, you'll have to normalize it<br>
+yourself.</li>
+<li>Compute sets V<sub>u</sub> of variables, where u is subword of w, such that<br>
+V<sub>u</sub> contains the variables from which you can derive u.
+<ul>
+<li>If |u| = 1, then V<sub>u</sub> = {A ∈ V | A ⇒<sup>+</sup> u}</li>
+<li>If |u| &gt; 1, then V<sub>u</sub> is set of all A ∈ V such that:
+<ul>
+<li>u = u<sub>1</sub>u<sub>2</sub> with u<sub>2</sub> and u<sub>2</sub> being some nonempty words</li>
+<li>A → BC is a production in the grammar, with B ∈ V<sub>u1</sub> and C ∈ V<sub>u2</sub></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>S ∈ V<sub>w</sub> ⇔ w ∈ L(G)</li>
+</ol>
+<h2 id="top-down-parsing-left-to-right">Top-down parsing (left-to-right)</h2>
+<p>Start from starting variable S, try to derive the input word.</p>
+<p>Simple leftmost:</p>
+<ul>
+<li>idea:
+<ul>
+<li>always expand leftmost variable A, replace A by u if A → u.</li>
+<li>backtrack on mismatch with input string, then try another<br>
+production rule A → v.</li>
+</ul>
+</li>
+<li>issue is that backtracking is expensive and hard</li>
+</ul>
+<h2 id="ll-parsing">LL parsing:</h2>
+<p>LL: left-to-right (top-down), leftmost derivation. Backtracking not<br>
+allowed.</p>
+<ul>
+<li>LL(1): looks at one symbol of input. grammar is LL(1) if parser<br>
+table has max one rule in every cell (i.e., no ambiguity when a<br>
+symbol is read)
+<ul>
+<li>left factorization can make a grammar LL(1). e.g:
+<ul>
+<li>{S → ab | ac } is not LL(1), ambiguity with one symbol<br>
+lookahead.</li>
+<li>if factorize to two rules, {S → aA, A → b | c}, the grammar<br>
+is LL(1).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>LL(k): looks k symbols ahead. table constructed with k symbol<br>
+lookahead, the grammar is LL(k) if the table has max one rule in<br>
+every cell. size of parser table grows exponentially.</li>
+</ul>
+<p>CFG prerequisite - must have no useless variables (though λ-productions<br>
+and unit productions are allowed)</p>
+<p>Steps:</p>
+<ul>
+<li>construct first and follow sets for every variable A. I'm using a<br>
+different algorithm here than what Joerg wrote, I like it more.
+<ul>
+<li>first set: the terminals that begin strings derivable from A
+<ol>
+<li>if A terminal, First(A) is just A</li>
+<li>if A → λ, add λ to First(A)</li>
+<li>if A → X1 X2...XN, add First(X1 X2...XN) to First(A)
+<ol>
+<li>First(X1 X2...XN) is
+<ul>
+<li>either First(X1), if First(X1) doesn't contain λ</li>
+<li>or (First(X1) \ {λ}) ∪ First(X2...XN)</li>
+</ul>
+</li>
+<li>Then, if First(X1) up to First(XN) all contain λ, add λ<br>
+to First(X1 X2...XN).</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>follow set: set of possible terminals immediately following A
+<ol>
+<li>Follow(S) = {$} ($ is end of input, S start symbol)</li>
+<li>If B → aAb, then Follow(A) += First(b) \ {λ}</li>
+<li>If B → aA, then Follow(A) += Follow(B)</li>
+<li>If B → aAb, and First(b) contains λ, then Follow(A) +=<br>
+Follow(B)</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>construct parsing table
+<ul>
+<li>columns indexed by terminals and $</li>
+<li>rows indexed by variables</li>
+<li>a cell at position [terminal, Var] contains rules Var → u for<br>
+which
+<ul>
+<li>terminal ∈ First(u)</li>
+<li>or λ ∈ First(u) and terminal ∈ Follow(Var)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>parse input using parsing table</li>
+</ul>
 </div></div>
 					</body>
 				</html>
