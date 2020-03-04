@@ -372,19 +372,19 @@ w is in L(G) (i.e., is accepted by the grammar).</p>
 <li>Take grammar G in Chomsky normal form. Hopefully someone will be<br>
 nice enough to give you that; if not, you'll have to normalize it<br>
 yourself.</li>
-<li>Compute sets V<sub>u</sub> of variables, where u is subword of w, such that<br>
-V<sub>u</sub> contains the variables from which you can derive u.
+<li>Compute sets V<sub>u</sub> of variables from which you can derive u, where u is a<br>
+<em>contiguous</em> subword of w.
 <ul>
-<li>If |u| = 1, then V<sub>u</sub> = {A ∈ V | A ⇒<sup>+</sup> u}</li>
-<li>If |u| &gt; 1, then V<sub>u</sub> is set of all A ∈ V such that:
+<li>If u is a letter, then V<sub>u</sub> are the variables that derive to u.</li>
+<li>If u is multiple letters, then V<sub>u</sub> is set of all variables such that:
 <ul>
-<li>u = u<sub>1</sub>u<sub>2</sub> with u<sub>2</sub> and u<sub>2</sub> being some nonempty words</li>
-<li>A → BC is a production in the grammar, with B ∈ V<sub>u1</sub> and C ∈ V<sub>u2</sub></li>
+<li>u = u<sub>1</sub>u<sub>2</sub> with u<sub>1</sub> and u<sub>2</sub> being some nonempty <em>words</em> (potentially multiple letters)</li>
+<li>A → BC is a production in the grammar, with B deriving to u<sub>1</sub> and C deriving to u<sub>2</sub></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>S ∈ V<sub>w</sub> ⇔ w ∈ L(G)</li>
+<li>If the starting variable is in the set of variables that derive to word w, then the grammar generates that word.</li>
 </ol>
 <h2 id="top-down-parsing-left-to-right">Top-down parsing (left-to-right)</h2>
 <p>Start from starting variable S, try to derive the input word.</p>
