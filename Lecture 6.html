@@ -423,55 +423,231 @@ every cell. size of parser table grows exponentially.</li>
 </ul>
 <p>CFG prerequisite - must have no useless variables (though λ-productions<br>
 and unit productions are allowed)</p>
-<p>Steps:</p>
+<p>I'll try to explain this in a more understandable way than the abstract notation we get.</p>
+<h3 id="first-set">First set</h3>
+<p>The set of terminals that begin strings derivable from variable A.</p>
+<p>To find First(A), you want to look at the RHS of every rule A -&gt; XY:</p>
 <ul>
-<li>construct first and follow sets for every variable A. I'm using a<br>
-different algorithm here than what Joerg wrote, I like it more.
+<li>if X is a terminal, then first(A) is that terminal</li>
+<li>if X is a variable, then first(A) is:
 <ul>
-<li>first set: the terminals that begin strings derivable from A
+<li>first(X)</li>
+<li>and if X can derive lambda, also first(Y)</li>
+</ul>
+</li>
+</ul>
+<h4 id="example">Example</h4>
+<p>Take the grammar with rules:</p>
 <ol>
-<li>if A terminal, First(A) is just A</li>
-<li>if A → λ, add λ to First(A)</li>
-<li>if A → X1 X2...XN, add First(X1 X2...XN) to First(A)
+<li>A → DbCbz</li>
+<li>A → dzzzA</li>
+<li>A → λ</li>
+<li>B → kkdb</li>
+<li>C → kzeA</li>
+<li>D → AneCB</li>
+</ol>
+<p>I start with B, because it doesn't depend on other first sets.</p>
+<p>First(B):</p>
+<ul>
+<li>rule 4: k is first, and is a terminal</li>
+<li>therefore First(B) = k</li>
+</ul>
+<p>First(C):</p>
+<ul>
+<li>rule 5: k is first, and is a terminal</li>
+<li>therefore First(C) = k</li>
+</ul>
+<p>First(A):</p>
+<ul>
+<li>rule 3: λ</li>
+<li>rule 2: d is first, and is a terminal</li>
+<li>rule 1: D is first, and is a variable, so have to find First(D):
+<ul>
+<li>from below, First(D) = {d, n}</li>
+</ul>
+</li>
+<li>therefore First(A) = {λ, d, n}</li>
+</ul>
+<p>First(D):</p>
+<ul>
+<li>rule 6: A is first, and is a variable, so have to find First(A):
+<ul>
+<li>from above, First(A) = {d, First(D)}</li>
+<li>A can derive λ, so First(D) includes n</li>
+</ul>
+</li>
+<li>therefore First(D) = {d, n}</li>
+</ul>
+<p>Remember, duplicates are excluded in sets.</p>
+<h3 id="follow-set">Follow set</h3>
+<p>The set of possible terminals immediately following a variable A.</p>
+<p>To find Follow(A), you want to look at rules that have A on the RHS:</p>
+<ul>
+<li>if A is followed by a terminal, add that terminal to Follow(A)</li>
+<li>if A is followed by variable V, add First(V) to Follow(A)</li>
+<li>if A is at the end of a rule V → XA, where X are some variables/terminals, add Follow(V) to Follow(A)</li>
+<li>if A is at the end of a rule, add $ to Follow(A) if
+<ul>
+<li>A is not included in any other RHS</li>
+<li>or is in a rule such as A → XA and can derive λ</li>
+</ul>
+</li>
+<li>the start symbol always has $ in its follow set</li>
+</ul>
+<h4 id="example-2">Example</h4>
+<p>Take the grammar with rules:</p>
 <ol>
-<li>First(X1 X2...XN) is
+<li>A → DbCbz</li>
+<li>A → dzzzA</li>
+<li>A → λ</li>
+<li>B → kkdb</li>
+<li>C → kzeA</li>
+<li>D → AneCB</li>
+</ol>
+<p>I start with D, as it does not depend much on other rules.</p>
+<p>Follow(D):</p>
 <ul>
-<li>either First(X1), if First(X1) doesn't contain λ</li>
-<li>or (First(X1) \ {λ}) ∪ First(X2...XN)</li>
+<li>rule 1: D is followed by b, which is a terminal</li>
+<li>therefore Follow(D) = {b}</li>
+</ul>
+<p>Follow(B):</p>
+<ul>
+<li>rule 6: B is the last symbol, so add Follow(D) to Follow(B)
+<ul>
+<li>from above, Follow(D) = {b}</li>
 </ul>
 </li>
-<li>Then, if First(X1) up to First(XN) all contain λ, add λ<br>
-to First(X1 X2...XN).</li>
-</ol>
+<li>therefore, Follow(B) = {b}</li>
+</ul>
+<p>Follow(C):</p>
+<ul>
+<li>rule 1: C is followed by b, which is a terminal</li>
+<li>rule 6: C is followed by B, which is a variable, so add First(B) to Follow(C)
+<ul>
+<li>in the previous section, we found First(B) = {k}</li>
+</ul>
 </li>
-</ol>
+<li>therefore, Follow(C) = {b, k}</li>
+</ul>
+<p>Follow(A):</p>
+<ul>
+<li>rule 6: A is followed by n, which is a terminal</li>
+<li>rule 5: A is the last symbol, so add Follow(C) to Follow(A)
+<ul>
+<li>from above, Follow(C) = {b, k}</li>
+</ul>
 </li>
-<li>follow set: set of possible terminals immediately following A
+<li>rule 2: A is the last symbol, so add Follow(A) to Follow(A)
+<ul>
+<li>since A can derive λ, also add $ to Follow(A)</li>
+<li>nothing else is added, because sets don't have duplicates</li>
+</ul>
+</li>
+<li>therefore, Follow(A) = {n, b, k, $}</li>
+</ul>
+<h3 id="parse-table-construction">Parse table construction</h3>
+<p>Once you have first and follow sets, you can construct a parse table.<br>
+The rows are indexed by variables, the columns are indexed by terminals.</p>
+<p>A cell at row A and column u contains a rule (LHS → RHS) if:</p>
+<ul>
+<li>u ∈ First(RHS)</li>
+<li>or λ ∈ First(RHS) and u ∈ Follow(LHS)</li>
+</ul>
+<h4 id="example-3">Example</h4>
+<p>Take the grammar with rules:</p>
 <ol>
-<li>Follow(S) = {$} ($ is end of input, S start symbol)</li>
-<li>If B → aAb, then Follow(A) += First(b) \ {λ}</li>
-<li>If B → aA, then Follow(A) += Follow(B)</li>
-<li>If B → aAb, and First(b) contains λ, then Follow(A) +=<br>
-Follow(B)</li>
+<li>A → DbCbz</li>
+<li>A → dzzzA</li>
+<li>A → λ</li>
+<li>B → kkdb</li>
+<li>C → kzeA</li>
+<li>D → AneCB</li>
 </ol>
-</li>
-</ul>
-</li>
-<li>construct parsing table
+<p>Rule 1:</p>
 <ul>
-<li>columns indexed by terminals and $</li>
-<li>rows indexed by variables</li>
-<li>a cell at position [terminal, Var] contains rules Var → u for<br>
-which
+<li>First(DbCbz) = First(D) = {d, n}</li>
+<li>therefore, it will be in row A, at columns d and n</li>
+</ul>
+<p>Rule 2:</p>
 <ul>
-<li>terminal ∈ First(u)</li>
-<li>or λ ∈ First(u) and terminal ∈ Follow(Var)</li>
+<li>First(dzzzA) = d</li>
+<li>therefore, it will be in row A, at column d</li>
 </ul>
-</li>
+<p>Rule 3:</p>
+<ul>
+<li>First(λ) = λ</li>
+<li>Follow(A) = {n, b, k, $}</li>
+<li>therefore, it will be in row A, at columns n, b, k, and $.</li>
 </ul>
-</li>
-<li>parse input using parsing table</li>
+<p>Rule 4:</p>
+<ul>
+<li>First(kkdb) = k</li>
+<li>therefore, it will be in row B, at column k</li>
 </ul>
+<p>Rule 5:</p>
+<ul>
+<li>First(kzeA) = k</li>
+<li>therefore, it will be in row C, at column k</li>
+</ul>
+<p>Rule 6:</p>
+<ul>
+<li>First(AneCB) = First(A) = {λ, d, n}</li>
+<li>because λ ∈ First(A), add n to First(AneCB). But it's already part of the set.</li>
+<li>therefore, the rule will be in row D, at columns d and n.</li>
+</ul>
+<p>The resulting parse table:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>b</th>
+<th>d</th>
+<th>n</th>
+<th>k</th>
+<th>z</th>
+<th>$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>A → λ</td>
+<td>A → DbCbz<br>A → dzzzA</td>
+<td>A → DbCbz<br>A → λ</td>
+<td>A → λ</td>
+<td></td>
+<td>A → λ</td>
+</tr>
+<tr>
+<td>B</td>
+<td></td>
+<td></td>
+<td></td>
+<td>B → kkdb</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>C</td>
+<td></td>
+<td></td>
+<td></td>
+<td>C → kzeA</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>D</td>
+<td></td>
+<td>D → AneCB</td>
+<td>D → AneCB</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>This table could not yet be used for LL(1) parsing, as there are cells containing more than one rule.</p>
 </div></div>
 					</body>
 				</html>
